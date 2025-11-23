@@ -25,12 +25,19 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
-.env
+# .env*.local
+# .env
 
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
+# next-env.d.ts
+
+# prisma
+prisma/*.db
+prisma/migrations
+
+# other
+package-lock.json

@@ -1,0 +1,65 @@
+/* カラーパレット */
+:root {
+  --brand-primary: #3a7bd5;
+  --brand-secondary: #6c757d;
+  --brand-accent: #f0ad4e;
+  --brand-bg: #f7f9fc;
+  --brand-border: #e1e5eb;
+  --brand-success: #4caf50;
+  --brand-danger: #d9534f;
+}
+
+/* 背景統一 */
+.app-body {
+  background-color: var(--brand-bg);
+}
+
+/* Navbar */
+.navbar {
+  background-color: white !important;
+  border-bottom: 1px solid var(--brand-border);
+}
+.navbar-brand {
+  font-weight: 600;
+  color: var(--brand-primary) !important;
+}
+
+/* Card */
+.card {
+  border-radius: 6px !important;
+  border-color: var(--brand-border) !important;
+}
+.card-header {
+  background: white !important;
+  font-weight: 600;
+  border-bottom: 1px solid var(--brand-border) !important;
+}
+
+/* ボタン */
+.btn-primary {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+}
+.btn-outline-primary {
+  color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+}
+
+/* フォーム */
+.form-control, .form-select {
+  border-radius: 4px !important;
+  border-color: var(--brand-border) !important;
+}
+
+/* Table */
+.table thead {
+  background-color: var(--brand-bg);
+}
+.table tbody tr:hover {
+  background-color: #f2f5fa !important;
+}
+
+/* 通知カード */
+.notification-card {
+  border-left: 4px solid var(--brand-accent) !important;
+}

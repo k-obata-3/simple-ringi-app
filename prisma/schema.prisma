@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    // "ADMIN" | "EMPLOYEE"
+  isActive     Boolean   @default(true)
+
+  requests     Request[] @relation("RequestRequester")
+  approvals    Approval[] @relation("ApprovalApprover")
+
+  auditLogs    AuditLog[]
+  notifications Notification[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Request {
+  id           String     @id @default(cuid())
+  title        String
+  status       String     // "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SENT_BACK"
+  type         String     // 申請種類
+  typeId       String
+  requestedBy  User       @relation("RequestRequester", fields: [requestedById], references: [id])
+  requestedById String
+
+  requestedAt  DateTime   @default(now())
+  submittedAt  DateTime?
+  jsonData     String?    // JSON文字列
+
+  approvals    Approval[]
+  auditLogs    AuditLog[]
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Approval {
+  id          String   @id @default(cuid())
+  request     Request  @relation(fields: [requestId], references: [id])
+  requestId   String
+
+  approver    User     @relation("ApprovalApprover", fields: [approverId], references: [id])
+  approverId  String
+
+  order       Int      // 承認順
+  status      String   // "PENDING" | "APPROVED" | "REJECTED" | "SENT_BACK"
+  comment     String?
+  decidedAt   DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  request   Request? @relation(fields: [requestId], references: [id])
+  requestId String?
+
+  action    String   // "REQUEST_CREATED" など
+  detail    String?  // JSON文字列
+  createdAt DateTime @default(now())
+}
+
+model RequestTemplate {
+  id        String   @id @default(cuid())
+  name      String   // 申請種類
+  fields    String   // JSON文字列
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  type      String   // "INFO" | "SUCCESS" | "ERROR" | "ACTION"
+  payload   String   // JSON文字列
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
