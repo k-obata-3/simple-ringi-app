@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Card, Table, Row, Col, Badge } from "react-bootstrap";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { toggleActiveApi } from "./apiClient";
 import UserEditModal from "./_UserEditModal";
 
 export default function UserListPageClient({ users }: { users: any[] }) {
@@ -11,12 +12,11 @@ export default function UserListPageClient({ users }: { users: any[] }) {
   const [editing, setEditing] = useState<any | null>(null);
 
   const toggleActive = async (user: any) => {
-    const res = await fetch("/api/admin/users/toggle-active", {
-      method: "POST",
-      body: JSON.stringify({ id: user.id, active: !user.isActive }),
-    });
-    const data = await res.json();
-    if (!data.ok) return push({ type: "error", message: "更新に失敗しました" });
+    const res = await toggleActiveApi({ id: user.id, active: !user.isActive })
+    if (!res.ok) {
+      return push({ type: "error", message: "更新に失敗しました" });
+      return;
+    }
 
     setList((prev) =>
       prev.map((u) => (u.id === user.id ? { ...u, isActive: !u.isActive } : u))
@@ -93,14 +93,14 @@ export default function UserListPageClient({ users }: { users: any[] }) {
           user={editing}
           onClose={() => setEditing(null)}
           onSaved={(updated) => {
-            setEditing(null);
-            if (updated.id) {
+            if (updated.id === editing.id) {
               setList((prev) =>
                 prev.map((u) => (u.id === updated.id ? updated : u))
               );
             } else {
-              setList((prev) => [updated, ...prev]);
+              setList((prev) => [...prev, updated,]);
             }
+            setEditing(null);
           }}
         />
       )}

@@ -1,6 +1,36 @@
 import { prisma } from "@/lib/prisma";
 
-export const templatetRepository = {
+export const templateRepository = {
+  findAll: () => {
+    return prisma.requestTemplate.findMany();
+  },
+  findById: (id: string) => {
+    return prisma.requestTemplate.findUnique({
+      where: {
+        id
+      }
+    });
+  },
+  create: (data: any) => {
+    return prisma.requestTemplate.create({
+      data
+    });
+  },
+  update: (id: string, data: any) => {
+    return prisma.requestTemplate.update({
+      where: {
+        id
+      },
+      data
+    });
+  },
+  delete: (id: string) => {
+    return prisma.requestTemplate.delete({
+      where: {
+        id
+      }
+    })
+  },
   findManyActiveTemplates: async () => {
     return prisma.requestTemplate.findMany({
       where: {
@@ -8,7 +38,6 @@ export const templatetRepository = {
       },
     });
   },
-
   findManyTemplates: () => {
     return prisma.requestTemplate.findMany({
       orderBy: {

@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { templatetRepository } from "@/repositories/template.repository";
+import { templateRepository } from "@/repositories/template.repository";
 import TemplateListPageClient from "./_TemplateListPageClient";
 
 /**
@@ -17,7 +17,7 @@ export default async function UserListPage() {
     redirect("/dashboard");
   }
 
-  const templates = await templatetRepository.findManyTemplates();
+  const templates = await templateRepository.findManyTemplates();
 
   return (
     <TemplateListPageClient templates={templates} />

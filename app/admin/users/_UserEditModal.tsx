@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal, Button, Form, } from "react-bootstrap";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { saveUserApi } from "./apiClient";
 
 export default function UserEditModal({
   user,
@@ -22,7 +23,7 @@ export default function UserEditModal({
   const [password, setPassword] = useState("");
 
   const handleSave = async () => {
-    const body = {
+    const payload = {
       id: user.id,
       name,
       email,
@@ -30,19 +31,14 @@ export default function UserEditModal({
       password: password || undefined,
     };
 
-    const res = await fetch("/api/admin/users", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    if (!data.ok) {
-      push({ type: "error", message: data.error?.message ?? "保存に失敗しました" });
+    const res = await saveUserApi(payload);
+    if (!res.ok) {
+      push({ type: "error", message: res.error?.message ?? "保存に失敗しました" });
       return;
     }
 
     push({ type: "success", message: "保存しました" });
-    onSaved(data.data.user);
+    onSaved(res.data.user);
   };
 
   return (

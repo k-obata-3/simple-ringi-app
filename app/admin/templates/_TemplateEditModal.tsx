@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Modal, Button, Form, Table, } from "react-bootstrap";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { createTemplateApi, updateTemplateApi } from "./apiClient";
 
 export default function TemplateEditModal({
   template,
@@ -79,9 +80,20 @@ export default function TemplateEditModal({
   };
 
   const handleSave = async () => {
-    // TODO: API呼び出し
+    const payload = {
+      name,
+      fields,
+      ...(editing ? { isActive } : {}),
+    };
+
+    const res = editing ? await updateTemplateApi(template.id, payload) : await createTemplateApi(payload);
+    if (!res.ok) {
+      push({ type: "error", message: res.error?.message ?? "保存に失敗しました" });
+      return;
+    }
+
     push({ type: "success", message: "保存しました" });
-    onSaved(template);
+    onSaved(res.data.template);
   };
 
   return (

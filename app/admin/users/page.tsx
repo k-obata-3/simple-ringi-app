@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { userRepository } from "@/repositories/user.repository";
 import UserListPageClient from "./_UserListPageClient";
 
 /**
@@ -17,9 +17,7 @@ export default async function UserListPage() {
     redirect("/dashboard");
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const users = await userRepository.findAll();
 
   return (
     <UserListPageClient users={users} />

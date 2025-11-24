@@ -8,17 +8,21 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   return withApiHandler(async () => {
     const session = await getServerSession(authOptions);
-    if (!session?.user) throw new AppError("UNAUTHORIZED", "認証が必要です", { status: 401 });
-    if (session.user.role !== "ADMIN")
+    if (!session?.user) {
+      throw new AppError("UNAUTHORIZED", "認証が必要です", { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
       throw new AppError("FORBIDDEN", "管理者のみアクセス可能です", { status: 403 });
+    }
 
     const json = await req.json();
     const parsed = userToggleActiveSchema.safeParse(json);
-    if (!parsed.success)
+    if (!parsed.success) {
       throw new AppError("VALIDATION_ERROR", "入力に誤りがあります", {
         status: 400,
         fieldErrors: parsed.error.flatten().fieldErrors,
       });
+    }
 
     const { id, active } = parsed.data;
 

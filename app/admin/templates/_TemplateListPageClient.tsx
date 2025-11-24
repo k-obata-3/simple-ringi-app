@@ -3,6 +3,7 @@
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useState } from "react";
 import { Button, Card, Table, Row, Col, Badge } from "react-bootstrap";
+import { deleteTemplateApi } from "./apiClient";
 import TemplateEditModal from "./_TemplateEditModal";
 
 export default function TemplateListPageClient({ templates }: { templates: any[] }) {
@@ -10,12 +11,17 @@ export default function TemplateListPageClient({ templates }: { templates: any[]
   const [list, setList] = useState(templates);
   const [editing, setEditing] = useState<any | null>(null);
 
-  const toggleActive = async (template: any) => {
-    // TODO: API呼び出し
-    setList((prev) =>
-      prev.map((t) => (t.id === template.id ? { ...t, isActive: !t.isActive } : t))
-    );
-    push({ type: "success", message: "更新しました" });
+  const handleDelete = async (id: string) => {
+    if (!confirm("削除しますか？")) return;
+
+    const res = await deleteTemplateApi(id);
+    if (!res.ok) {
+      push({ type: "error", message: res.error?.message ?? "削除に失敗しました" });
+      return;
+    }
+
+    setList((prev) => prev.filter((_: any, i: number) => _.id !== id));
+    push({ type: "success", message: "削除しました" });
   };
 
   return (
@@ -23,7 +29,6 @@ export default function TemplateListPageClient({ templates }: { templates: any[]
       <Row className="mb-3">
         <Col>
           <h3>稟議テンプレート管理</h3>
-          <span className="text-danger">※登録/更新/削除機能は未実装です。</span>
         </Col>
         <Col className="text-end">
           <Button onClick={() => setEditing({})}>新規登録</Button>
@@ -64,12 +69,8 @@ export default function TemplateListPageClient({ templates }: { templates: any[]
                       >
                         編集
                       </Button>
-                      <Button
-                        size="sm"
-                        variant={t.isActive ? "outline-danger" : "outline-success"}
-                        onClick={() => toggleActive(t)}
-                      >
-                        {t.isActive ? "無効化" : "有効化"}
+                      <Button size="sm" variant="danger" className="ms-2" onClick={() => handleDelete(t.id)}>
+                        削除
                       </Button>
                     </td>
                   </tr>
@@ -86,14 +87,14 @@ export default function TemplateListPageClient({ templates }: { templates: any[]
           template={editing}
           onClose={() => setEditing(null)}
           onSaved={(updated) => {
-            setEditing(null);
-            if (updated.id) {
+            if (updated.id === editing.id) {
               setList((prev) =>
                 prev.map((t) => (t.id === updated.id ? updated : t))
               );
             } else {
-              setList((prev) => [updated, ...prev]);
+              setList((prev) => [...prev, updated]);
             }
+            setEditing(null);
           }}
         />
       )}

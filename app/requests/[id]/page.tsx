@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requestRepository } from "@/repositories/request.repository";
-import { templatetRepository } from "@/repositories/template.repository";
+import { templateRepository } from "@/repositories/template.repository";
 import { userRepository } from "@/repositories/user.repository";
 import RequestPageClient from "../_RequestPageClient";
 
@@ -20,7 +20,7 @@ export default async function RequestPage({ params, searchParams }: Props) {
   }
 
   // 稟議テンプレートを取得
-  const templates = await templatetRepository.findManyActiveTemplates();
+  const templates = await templateRepository.findManyActiveTemplates();
   // 承認者候補の一覧を取得（自分以外）
   const approvers = await userRepository.findManyApprovers(session.user.id);
   // 申請情報を取得
