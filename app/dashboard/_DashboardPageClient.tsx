@@ -159,7 +159,7 @@ export default function DashboardPageClient({
                           {new Date(req.requestedAt).toLocaleString("ja-JP")}
                         </td>
                         <td>
-                          {total > 0 ? `${approved} / ${total}` : "-"}
+                          {total > 0 && req.status !== "DRAFT" ? `${approved} / ${total}` : "-"}
                         </td>
                         <td>
                           {(req.status === statusValueLabel("DRAFT").value || req.status === statusValueLabel("SENT_BACK").value) &&

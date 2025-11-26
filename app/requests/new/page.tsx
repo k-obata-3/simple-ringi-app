@@ -26,6 +26,7 @@ export default async function NewRequestPage() {
       templates={templates}
       request={null}
       approvers={approvers}
+      isApprover={false}
       mode="edit"
     />
   );

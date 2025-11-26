@@ -106,7 +106,7 @@ export default function TemplateEditModal({
         </Modal.Header>
 
         <Modal.Body>
-          <form action={handleSave}>
+          <Form action={handleSave}>
             {editing && <input type="hidden" name="id" value={template.id} />}
 
             <Form.Group className="mb-3">
@@ -185,7 +185,7 @@ export default function TemplateEditModal({
             )}
 
             <Button type="submit">保存</Button>
-          </form>
+          </Form>
         </Modal.Body>
       </Modal>
 
@@ -196,57 +196,59 @@ export default function TemplateEditModal({
         </Modal.Header>
 
         <Modal.Body>
-          <Form.Group className="mb-3">
-            <Form.Label>キー名（key）</Form.Label>
-            <Form.Control
-              value={fieldKey}
-              onChange={(e) => setFieldKey(e.target.value)}
-              placeholder="itemName"
-              required
-            />
-          </Form.Group>
+          <Form action={saveField}>
+            <Form.Group className="mb-3">
+              <Form.Label>キー名</Form.Label>
+              <Form.Control
+                value={fieldKey}
+                onChange={(e) => setFieldKey(e.target.value)}
+                placeholder="itemName"
+                required
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>表示名（label）</Form.Label>
-            <Form.Control
-              value={fieldLabel}
-              onChange={(e) => setFieldLabel(e.target.value)}
-              placeholder="品名"
-              required
-            />
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>表示名</Form.Label>
+              <Form.Control
+                value={fieldLabel}
+                onChange={(e) => setFieldLabel(e.target.value)}
+                placeholder="品名"
+                required
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>入力形式（inputType）</Form.Label>
-            <Form.Select
-              value={fieldType}
-              onChange={(e) => setFieldType(e.target.value)}
-            >
-              <option value="text">text</option>
-              <option value="number">number</option>
-              <option value="textarea">textarea</option>
-              <option value="date">date</option>
-            </Form.Select>
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>入力形式</Form.Label>
+              <Form.Select
+                value={fieldType}
+                onChange={(e) => setFieldType(e.target.value)}
+              >
+                <option value="text">text</option>
+                <option value="number">number</option>
+                <option value="textarea">textarea</option>
+                <option value="date">date</option>
+              </Form.Select>
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Check
-              type="checkbox"
-              label="必須項目"
-              checked={fieldRequired}
-              onChange={(e) => setFieldRequired(e.target.checked)}
-            />
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="必須項目"
+                checked={fieldRequired}
+                onChange={(e) => setFieldRequired(e.target.checked)}
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>初期値（value）</Form.Label>
-            <Form.Control
-              value={fieldValue}
-              onChange={(e) => setFieldValue(e.target.value)}
-            />
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>初期値</Form.Label>
+              <Form.Control
+                value={fieldValue}
+                onChange={(e) => setFieldValue(e.target.value)}
+              />
+            </Form.Group>
 
-          <Button onClick={saveField}>項目を保存</Button>
+            <Button type="submit">項目を保存</Button>
+          </Form>
         </Modal.Body>
       </Modal>
     </>

@@ -22,21 +22,16 @@ type Props = {
   templates: any;
   request: any; // 新規の場合は null を想定
   approvers: any
+  isApprover: boolean
   mode: "view" | "edit";
 };
 
-export default function RequestPageClient({ currentUser, templates, request, approvers, mode }: Props) {
+export default function RequestPageClient({ currentUser, templates, request, approvers, isApprover, mode }: Props) {
   const router = useRouter();
   const wizard = useRequestWizardStore();
   const push = useNotificationStore((s) => s.push);
 
   const isNew = !request;
-  const isApprover = request?.approvals?.some(
-    (a: any) => a.approverId === currentUser.id
-  );
-  const viewEnable = mode === "view" && ((request?.requestedById === currentUser.id) || currentUser.role === "ADMIN" || isApprover);
-  const editEnable = isNew || request?.requestedById === currentUser.id && (request.status === "DRAFT" || request.status === "SENT_BACK");
-
   const currentJsonData: any = wizard.typeId ? wizard.jsonData : {};
   const getTemplate = (typeId: string) => {
     return templates.find((t: any) => t.id === typeId);
@@ -166,7 +161,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
         </Col>
       </Row>
       {/* 詳細表示モード */}
-      {viewEnable && (
+      {mode === "view" && (
         <>
           <Col className="mb-3" sm={12}>
             <Card>
@@ -211,8 +206,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
             <AuditLogsClient auditLogs={request.auditLogs}/>
           </Col>
           {/* 承認者用の操作ボタン */}
-          {isApprover && request.status === "PENDING" &&
-            request.approvals.some(
+          {request.status === "PENDING" && request.approvals.some(
               (a: any) => a.approverId === currentUser.id && a.status === "PENDING"
             ) && (
               <div className="d-flex justify-content-end  gap-2">
@@ -242,7 +236,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
       )}
 
       {/* 編集表示モード */}
-      {mode === "edit" && editEnable && (
+      {mode === "edit" && (
         <>
           {/* ウィザードステップ表示 */}
           <Col sm={12} className="mb-3">
