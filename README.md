@@ -64,10 +64,10 @@
 
 ### ダッシュボード（共通）
 
-- 新規申請
+#### 新規申請
+
 - 自分の申請一覧
 - 承認待ち一覧（承認者用）
-- すべての申請一覧（管理者用）
 - 未読通知の表示
 
 ```
@@ -138,14 +138,20 @@ git clone <repository-url>
 cd simple-ringi-app
 ```
 
-### 2. パッケージインストール
+### 2. プロジェクト起動
+1. プロジェクト起動を起動するとtaskが自動実行される
+1. ターミナルに下記が表示されたら任意の名前を入力してEnter
+
 ```
-npm install
+? Enter a name for the new migration: >>
+
+※ここで入力した値がマイグレーションファイル名になる。
+※何も入力せずEnterでも実行可能だが、初回は「init」と入力しておけばとりあえずOK。
 ```
 
-### 3. 環境変数設定
+### 3. 環境変数の変更（任意）
 
-.env を作成
+.env
 ```
 DATABASE_URL="file:./dev.db"
 
@@ -157,15 +163,9 @@ NEXTAUTH_URL="http://localhost:3000"
 ```
 openssl rand -hex 32
 ```
-で生成できます。
+で生成できますが、そのままでも起動可能です。
 
-### 4. Prisma セットアップ
-```
-npx prisma generate
-npx prisma migrate dev --name init
-```
-
-### 5. 開発サーバ起動
+### 4. 開発サーバ起動
 ```
 npm run dev
 ```
@@ -173,11 +173,20 @@ npm run dev
 http://localhost:3000
  にアクセス。
 
+
 ## テスト実行（任意）
 ```
 npm test
 ```
 Repository の単体テストが Jest で実行されます。
+
+
+## DBを初期化したいとき（任意）
+
+1. prisma/migratiions を削除
+1. prisma/dev.db を削除
+1. プロジェクトを開きなおすとmigratiionが自動実行されるので
+
 
 ## 初期ユーザー
 

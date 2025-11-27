@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+    {
+      "type": "shell",
+      "command": "npm install; npx prisma generate; npx prisma migrate dev; npm test; echo セットアップ完了;",
+      "problemMatcher": [],
+      "label": "npm install; npx prisma generate; npx prisma migrate dev; npm test;",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+  ]
+}
