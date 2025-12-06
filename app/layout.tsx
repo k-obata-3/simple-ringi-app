@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Header />
           <NotificationToasts />
           <main>
-            <div className="py-2 ps-4 pe-4">
+            <div className="contents-parent py-2 ps-4 pe-4">
               {children}
             </div>
           </main>

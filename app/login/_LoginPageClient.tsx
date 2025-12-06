@@ -32,7 +32,7 @@ export default function LoginPageClient() {
   return (
     <div className="d-flex align-items-center justify-content-center py-5">
       <Row className="w-100 justify-content-center">
-        <Col md={4}>
+        <Col md={8} xl={4}>
           <Card className="shadow-sm">
             <Card.Body>
               <Card.Title className="mb-4 text-center">

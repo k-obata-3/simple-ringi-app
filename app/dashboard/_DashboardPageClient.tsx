@@ -5,6 +5,8 @@ import { Button, Card, Row, Col, Table, Badge } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 import { statusValueLabel } from "@/lib/utils";
 import Link from "next/link";
+import { useMediaQuery } from "@/components/ui/useMediaQuery";
+import CommonCard from "@/components/ui/CommonCard";
 
 type RequestWithApprovals = any; // Prisma 型を入れてOK
 
@@ -26,6 +28,7 @@ export default function DashboardPageClient({
   unreadCount,
 }: Props) {
   const router = useRouter();
+  const isMobile = useMediaQuery();
   const [tab, setTab] = useState<"my" | "approve" | "all">("my");
   const isAdmin = user.role === "ADMIN";
   const currentList =
@@ -86,23 +89,25 @@ export default function DashboardPageClient({
           <h3>ダッシュボード</h3>
         </Col>
         <Col className="text-end">
-          <Button onClick={() => router.push("/requests/new")}>
+          <Button size={isMobile ? "sm" : undefined} onClick={() => router.push("/requests/new")}>
             新規申請
           </Button>
         </Col>
       </Row>
       <Row className="mb-3">
         <Col>
-          <Card className="mb-3">
+          <Card>
             <Card.Body className="d-flex gap-2">
               <Button
                 variant={tab === "my" ? "primary" : "outline-primary"}
+                size={isMobile ? "sm" : undefined}
                 onClick={() => setTab("my")}
               >
                 自分の申請
               </Button>
               <Button
                 variant={tab === "approve" ? "primary" : "outline-primary"}
+                size={isMobile ? "sm" : undefined}
                 onClick={() => setTab("approve")}
               >
                 承認待ち
@@ -110,6 +115,7 @@ export default function DashboardPageClient({
               {isAdmin && (
                 <Button
                   variant={tab === "all" ? "primary" : "outline-primary"}
+                  size={isMobile ? "sm" : undefined}
                   onClick={() => setTab("all")}
                 >
                   すべて
@@ -120,68 +126,116 @@ export default function DashboardPageClient({
         </Col>
       </Row>
 
-      <Row>
-        <Col>
-          <Card>
-            <Card.Body className="p-0">
-              <Table hover responsive className="mb-0">
-                <thead>
-                  <tr className="text-center">
-                    <th>タイトル</th>
-                    <th>種類</th>
-                    <th>ステータス</th>
-                    <th>申請日</th>
-                    <th>承認状況</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentList.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="text-center py-3">
-                        申請はありません。
-                      </td>
+      {isMobile && (
+        <>
+          {currentList.map((req: any) => {
+            const total = req.approvals.length;
+            const approved = req.approvals.filter((a: any) => a.status === "APPROVED").length;
+            const body = () => {
+              return (
+                <Row>
+                  <div className="text-end">
+                    <Badge bg={statusValueLabel(req.status).bg}>{statusValueLabel(req.status).label}</Badge>
+                  </div>
+                  <div className="d-flex">
+                    <span className="me-auto">申請日</span>
+                    <span>{new Date(req.requestedAt).toLocaleString("ja-JP")}</span>
+                  </div>
+                  <div className="d-flex">
+                    <span className="me-auto">承認状況</span>
+                    <span>{total > 0 && req.status !== "DRAFT" ? `${approved} / ${total}` : "-"}</span>
+                  </div>
+                </Row>
+              )
+            }
+            const footer = () => {
+              return (
+                <div className="d-grid">
+                  {(req.status === statusValueLabel("DRAFT").value || req.status === statusValueLabel("SENT_BACK").value) &&
+                    req.requestedById === user.id ? (
+                      <Link href={`/requests/${req.id}?mode=edit`} className="btn btn-sm btn-outline-secondary">
+                        編集
+                      </Link>
+                    ) : (
+                    <Link href={`/requests/${req.id}`} className="btn btn-sm btn-outline-primary">
+                      詳細
+                    </Link>
+                    )}
+                </div>
+              )
+            }
+
+            return (
+              <div key={req.id}>
+                <CommonCard title={req.title} children={body()} footer={footer()}></CommonCard>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      {!isMobile && (
+        <Row>
+          <Col>
+            <Card>
+              <Card.Body className="p-0">
+                <Table hover responsive className="mb-0">
+                  <thead>
+                    <tr className="text-center">
+                      <th>タイトル</th>
+                      <th>種類</th>
+                      <th>ステータス</th>
+                      <th>申請日</th>
+                      <th>承認状況</th>
+                      <th></th>
                     </tr>
-                  )}
-                  {currentList.map((req: any) => {
-                    const total = req.approvals.length;
-                    const approved = req.approvals.filter(
-                      (a: any) => a.status === "APPROVED"
-                    ).length;
-                    return (
-                      <tr key={req.id} className="text-center">
-                        <td className="text-start">{req.title}</td>
-                        <td>{req.type}</td>
-                        <td>
-                          <Badge bg={statusValueLabel(req.status).bg}>{statusValueLabel(req.status).label}</Badge>
-                        </td>
-                        <td>
-                          {new Date(req.requestedAt).toLocaleString("ja-JP")}
-                        </td>
-                        <td>
-                          {total > 0 && req.status !== "DRAFT" ? `${approved} / ${total}` : "-"}
-                        </td>
-                        <td>
-                          {(req.status === statusValueLabel("DRAFT").value || req.status === statusValueLabel("SENT_BACK").value) &&
-                            req.requestedById === user.id ? (
-                              <Link href={`/requests/${req.id}?mode=edit`} className="btn btn-sm btn-outline-secondary">
-                                編集
-                              </Link>
-                            ) : (
-                            <Link href={`/requests/${req.id}`} className="btn btn-sm btn-outline-primary">
-                              詳細
-                            </Link>
-                            )}
+                  </thead>
+                  <tbody>
+                    {currentList.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="text-center py-3">
+                          申請はありません。
                         </td>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                    )}
+                    {currentList.map((req: any) => {
+                      const total = req.approvals.length;
+                      const approved = req.approvals.filter((a: any) => a.status === "APPROVED").length;
+                      return (
+                        <tr key={req.id} className="text-center">
+                          <td className="text-start">{req.title}</td>
+                          <td>{req.type}</td>
+                          <td>
+                            <Badge bg={statusValueLabel(req.status).bg}>{statusValueLabel(req.status).label}</Badge>
+                          </td>
+                          <td>
+                            {new Date(req.requestedAt).toLocaleString("ja-JP")}
+                          </td>
+                          <td>
+                            {total > 0 && req.status !== "DRAFT" ? `${approved} / ${total}` : "-"}
+                          </td>
+                          <td>
+                            {(req.status === statusValueLabel("DRAFT").value || req.status === statusValueLabel("SENT_BACK").value) &&
+                              req.requestedById === user.id ? (
+                                <Link href={`/requests/${req.id}?mode=edit`} className="btn btn-sm btn-outline-secondary">
+                                  編集
+                                </Link>
+                              ) : (
+                              <Link href={`/requests/${req.id}`} className="btn btn-sm btn-outline-primary">
+                                詳細
+                              </Link>
+                              )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
     </div>
   );
 }

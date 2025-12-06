@@ -5,21 +5,21 @@ type StatusKey = "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "SENT_BACK";
 export function getActionValueLabel(key: ActionKey) {
   switch (key) {
     case "REQUEST_DRAFT_CREATED":
-      return {value: "REQUEST_DRAFT_CREATED", label: "下書き作成"};
+      return {value: "REQUEST_DRAFT_CREATED", bg: "secondary", label: "下書き作成"};
     case "REQUEST_DRAFT_UPDATED":
-      return {value: "REQUEST_DRAFT_UPDATED", label: "更新"};
+      return {value: "REQUEST_DRAFT_UPDATED", bg: "primary", label: "更新"};
     case "REQUEST_DRAFT_DELETED":
-      return {value: "REQUEST_DRAFT_DELETED", label: "削除"};
+      return {value: "REQUEST_DRAFT_DELETED", bg: "secondary", label: "削除"};
     case "REQUEST_SUBMITTED":
       return {value: "REQUEST_SUBMITTED", label: "申請"};
     case "REQUEST_APPROVED":
-      return {value: "REQUEST_APPROVED", label: "承認"};
+      return {value: "REQUEST_APPROVED", bg: "success", label: "承認"};
     case "SENT_BACK":
-      return {value: "SENT_BACK", label: "差戻"};
+      return {value: "SENT_BACK", bg: "info", label: "差戻"};
     case "REQUEST_REJECTED":
-      return {value: "REQUEST_REJECTED", label: "却下"};
+      return {value: "REQUEST_REJECTED", bg: "danger", label: "却下"};
     default:
-      return {value: "", label: ""};
+      return {value: "", bg: "light", label: ""};
   }
 };
 

@@ -63,3 +63,39 @@
 .notification-card {
   border-left: 4px solid var(--brand-accent) !important;
 }
+
+/* スマホ用下部固定ボタン　コンポーネント STRT */
+@media (max-width: 768px) {
+  .contents-parent:has(.bottom-action-bar) {
+    margin-bottom: 2.5rem;
+  }
+}
+
+.bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  background: #fff;
+  border-top: 1px solid #ddd;
+
+  padding: 8px 12px;
+
+  z-index: 9999;
+
+  /* iPhone の Safe Area 対応 */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+}
+
+.action-container {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  flex: 1;
+  font-size: 1rem;
+  padding: 12px 0;
+}
+/* スマホ用下部固定ボタン　コンポーネント END */

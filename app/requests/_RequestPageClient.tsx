@@ -6,8 +6,10 @@ import { useEffect } from "react";
 import { Button, Card, Row, Col, Form, ProgressBar, Badge } from "react-bootstrap";
 import { useRouter } from "next/navigation";
 import { statusValueLabel } from "@/lib/utils";
+import { useMediaQuery } from "@/components/ui/useMediaQuery";
 import AuditLogsClient from "./_AuditLogsClient";
 import ApprovalStatusClient from "./_ApprovalStatusClient";
+import BottomActionBar from "@/components/ui/BottomActionBar";
 
 interface Field {
   key: string;
@@ -28,11 +30,14 @@ type Props = {
 
 export default function RequestPageClient({ currentUser, templates, request, approvers, isApprover, mode }: Props) {
   const router = useRouter();
+  const isMobile = useMediaQuery();
   const wizard = useRequestWizardStore();
   const push = useNotificationStore((s) => s.push);
 
   const isNew = !request;
-  const currentJsonData: any = wizard.typeId ? wizard.jsonData : {};
+  const currentJsonData: any = wizard.typeId ? wizard.jsonData : [];
+  const enabledApproveAction = request?.status === "PENDING" && request.approvals.some(
+    (a: any) => a.approverId === currentUser.id && a.status === "PENDING")
   const getTemplate = (typeId: string) => {
     return templates.find((t: any) => t.id === typeId);
   }
@@ -148,13 +153,35 @@ export default function RequestPageClient({ currentUser, templates, request, app
     router.replace('/dashboard');
   };
 
+  const enabledSubmitAction = () => {
+    const title = wizard.title.trim();
+    let errorJson:any = [];
+    currentJsonData?.forEach((field: Field) => {
+      if(field.inputType === "date") {
+        if(field.value && isNaN(new Date(field.value).getDate())) {
+          errorJson.push(field);
+        } else if(field.required && !field.value) {
+          errorJson.push(field);
+        }
+      } else if(field.required && (!field.value || !field.value.toString().trim())) {
+        errorJson.push(field);
+      }
+    });
+
+    if(title && wizard.type && wizard.approverIds.length && !errorJson.length) {
+      return true;
+    }
+
+    return false;
+  }
+
   return (
     <Row className="mb-3">
       <Row className="mb-3">
         <Col>
           <h3>{isNew ? "新規稟議申請" : "稟議申請 詳細"}</h3>
         </Col>
-        <Col className="text-end">
+        <Col className="col-auto">
           {!isNew && (
             <Badge bg={statusValueLabel(request.status).bg}>{statusValueLabel(request.status).label}</Badge>
           )}
@@ -206,32 +233,34 @@ export default function RequestPageClient({ currentUser, templates, request, app
             <AuditLogsClient auditLogs={request.auditLogs}/>
           </Col>
           {/* 承認者用の操作ボタン */}
-          {request.status === "PENDING" && request.approvals.some(
-              (a: any) => a.approverId === currentUser.id && a.status === "PENDING"
-            ) && (
-              <div className="d-flex justify-content-end  gap-2">
-                <Button
-                  variant="success"
-                  onClick={() => handleApprovalAction("approve")}
-                >
-                  承認する
-                </Button>
-
-                <Button
-                  variant="danger"
-                  onClick={() => handleApprovalAction("reject")}
-                >
-                  却下する
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  onClick={() => handleApprovalAction("sendBack")}
-                >
-                  差戻する
-                </Button>
-              </div>
-            )}
+          {enabledApproveAction && isMobile && (
+            <BottomActionBar
+              actions={[
+                {
+                  label: "承認する",
+                  variant: "success",
+                  onClick: () => handleApprovalAction("approve")
+                },
+                {
+                  label: "却下する",
+                  variant: "danger",
+                  onClick: () => handleApprovalAction("reject")
+                },
+                {
+                  label: "差戻する",
+                  variant: "secondary",
+                  onClick: () => handleApprovalAction("sendBack")
+                },
+              ]}
+            />
+          )}
+          {enabledApproveAction && !isMobile && (
+            <div className="d-flex justify-content-end gap-2">
+              <Button variant="success" onClick={() => handleApprovalAction("approve")}>承認する</Button>
+              <Button variant="danger" onClick={() => handleApprovalAction("reject")}>却下する</Button>
+              <Button variant="secondary" onClick={() => handleApprovalAction("sendBack")}>差戻する</Button>
+            </div>
+          )}
         </>
       )}
 
@@ -251,6 +280,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
                   <Form>
                     <Form.Group className="mb-3">
                       <Form.Label>タイトル</Form.Label>
+                      <span className="ps-1 text-danger">*</span>
                       <Form.Control
                         value={wizard.title}
                         onChange={(e) => wizard.setField({ title: e.target.value })}
@@ -258,6 +288,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
                     </Form.Group>
                     <Form.Group className="mb-3">
                       <Form.Label>申請種類</Form.Label>
+                      <span className="ps-1 text-danger">*</span>
                       <Form.Select
                         value={wizard.typeId}
                         onChange={(e) => wizard.setField({
@@ -289,6 +320,9 @@ export default function RequestPageClient({ currentUser, templates, request, app
                   {currentJsonData?.map((f: Field) => (
                     <Form.Group key={f.key} className="mb-3">
                       <Form.Label>{f.label}</Form.Label>
+                      {f.required && (
+                        <span className="ps-1 text-danger">*</span>
+                      )}
 
                       {f.inputType === "text" && (
                         <Form.Control
@@ -341,6 +375,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
                     <Card.Body>
                       <Form.Group>
                         <Form.Label>承認者（複数選択可能）</Form.Label>
+                        <span className="ps-1 text-danger">*</span>
                         <Form.Select
                           multiple
                           value={wizard.approverIds}
@@ -362,45 +397,31 @@ export default function RequestPageClient({ currentUser, templates, request, app
               </>
             )}
 
-            <Row>
-              <Col xs={3}>
-                {wizard.step > 1 && (
-                  <Button
-                    variant="outline-secondary"
-                    className="me-2"
-                    onClick={wizard.prev}
-                  >
+            {isMobile && (
+              <Row>
+                <Col xs={6} className="d-grid">
+                  <Button variant="outline-secondary" onClick={() => wizard.step > 1 ? wizard.prev() : router.back()} disabled={wizard.step === 1}>
                     戻る
                   </Button>
-                )}
-              </Col>
-              <Col className="text-end">
+                </Col>
                 {wizard.step < wizard.maxStep && (
-                  <Button variant="primary" onClick={wizard.next} disabled={!wizard.title || !wizard.typeId}>
-                    次へ
-                  </Button>
+                  <Col xs={6} className="d-grid">
+                    <Button variant="outline-primary" onClick={wizard.next} disabled={!wizard.type}>次へ</Button>
+                  </Col>
                 )}
-                {wizard.step === wizard.maxStep && (
-                  <>
-                    <Button
-                      variant="outline-secondary"
-                      className="me-2"
-                      onClick={handleSaveDraft}
-                    >
-                      下書き保存
-                    </Button>
-                    <Button
-                      variant="primary"
-                      onClick={() =>
-                        handleSubmit(request?.status === "SENT_BACK" ? "resubmit" : "submit")
-                      }
-                    >
-                      {request?.status === "SENT_BACK" ? "再申請" : "申請"}
-                    </Button>
-                  </>
-                )}
-              </Col>
-            </Row>
+              </Row>
+            )}
+
+            {!isMobile && (
+              <div className="d-flex justify-content-between gap-2">
+                <Button variant="outline-secondary" onClick={wizard.prev} disabled={wizard.step === 1}>戻る</Button>
+                <div>
+                  {wizard.step < wizard.maxStep && (
+                    <Button variant="outline-primary" onClick={wizard.next} disabled={!wizard.type}>次へ</Button>
+                  )}
+                </div>
+              </div>
+            )}
           </Col>
 
           {/* 操作履歴 */}
@@ -408,6 +429,35 @@ export default function RequestPageClient({ currentUser, templates, request, app
             <Col xl={5}>
               <AuditLogsClient auditLogs={request.auditLogs}/>
             </Col>
+          )}
+
+          {isMobile && (
+            <BottomActionBar
+              actions={[
+                {
+                  label: "下書き保存",
+                  variant: "outline-secondary",
+                  onClick: handleSaveDraft,
+                  disabled:!enabledSubmitAction()
+                },
+                {
+                  label: `${request?.status === "SENT_BACK" ? "再申請" : "申請"}`,
+                  variant: "primary",
+                  onClick: () => handleSubmit(request?.status === "SENT_BACK" ? "resubmit" : "submit"),
+                  disabled:!enabledSubmitAction()
+                },
+              ]}
+            />
+          )}
+          {!isMobile && (
+            <div className="d-flex justify-content-end mt-3">
+              <Button variant="outline-secondary" className="me-2" onClick={handleSaveDraft} disabled={!enabledSubmitAction()}>
+                下書き保存
+              </Button>
+              <Button variant="primary" onClick={() => handleSubmit(request?.status === "SENT_BACK" ? "resubmit" : "submit")} disabled={!enabledSubmitAction()}>
+                {request?.status === "SENT_BACK" ? "再申請" : "申請"}
+              </Button>
+            </div>
           )}
         </>
       )}

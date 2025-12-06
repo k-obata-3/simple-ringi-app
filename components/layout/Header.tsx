@@ -32,7 +32,7 @@ export default function Header() {
                   ユーザ管理
                 </Nav.Link>
                 <Nav.Link as={Link} href="/admin/templates">
-                  稟議テンプレート管理
+                  テンプレート管理
                 </Nav.Link>
               </>
             )}

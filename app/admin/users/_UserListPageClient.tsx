@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Button, Card, Table, Row, Col, Badge } from "react-bootstrap";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { toggleActiveApi } from "./apiClient";
+import { useMediaQuery } from "@/components/ui/useMediaQuery";
 import UserEditModal from "./_UserEditModal";
+import CommonCard from "@/components/ui/CommonCard";
 
 export default function UserListPageClient({ users }: { users: any[] }) {
+  const isMobile = useMediaQuery();
   const push = useNotificationStore((s) => s.push);
   const [list, setList] = useState(users);
   const [editing, setEditing] = useState<any | null>(null);
@@ -31,62 +34,102 @@ export default function UserListPageClient({ users }: { users: any[] }) {
           <h3>ユーザ管理</h3>
         </Col>
         <Col className="text-end">
-          <Button onClick={() => setEditing({})}>新規登録</Button>
+          <Button size={isMobile ? "sm" : undefined} onClick={() => setEditing({})}>新規登録</Button>
         </Col>
       </Row>
 
-      <Card>
-        <Card.Body className="p-0">
-          <Table hover responsive className="mb-0">
-            <thead>
-              <tr>
-                <th>名前</th>
-                <th>メール</th>
-                <th>ロール</th>
-                <th>状態</th>
-                <th>作成日</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>
-                    {u.role === "ADMIN" ? "管理者": u.role === "EMPLOYEE" ? "社員" : u.role}
-                  </td>
-                  <td>
+      {isMobile && (
+        <>
+          {list.map(u => {
+            const body = () => {
+              return (
+                <Row>
+                  <div className="text-end">
                     {u.isActive ? (
                       <Badge bg="success">有効</Badge>
                     ) : (
                       <Badge bg="secondary">無効</Badge>
                     )}
-                  </td>
-                  <td>{new Date(u.createdAt).toLocaleDateString("ja-JP")}</td>
-                  <td className="text-end">
-                    <Button
-                      size="sm"
-                      variant="outline-primary"
-                      className="me-2"
-                      onClick={() => setEditing(u)}
-                    >
-                      編集
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={u.isActive ? "outline-danger" : "outline-success"}
-                      onClick={() => toggleActive(u)}
-                    >
-                      {u.isActive ? "無効化" : "有効化"}
-                    </Button>
-                  </td>
+                  </div>
+                </Row>
+              )
+            }
+            const footer = () => {
+              return (
+                <Button
+                  size="sm"
+                  variant="outline-primary"
+                  className="d-grid w-100"
+                  onClick={() => setEditing(u)}
+                >
+                  編集
+                </Button>
+              )
+            }
+
+            return (
+              <div key={u.id}>
+                <CommonCard title={u.name} children={body()} footer={footer()}></CommonCard>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      {!isMobile && (
+        <Card>
+          <Card.Body className="p-0">
+            <Table hover responsive className="mb-0">
+              <thead>
+                <tr>
+                  <th>名前</th>
+                  <th>メール</th>
+                  <th>ロール</th>
+                  <th>状態</th>
+                  <th>作成日</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+              </thead>
+              <tbody>
+                {list.map(u => (
+                  <tr key={u.id}>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>
+                      {u.role === "ADMIN" ? "管理者": u.role === "EMPLOYEE" ? "社員" : u.role}
+                    </td>
+                    <td>
+                      {u.isActive ? (
+                        <Badge bg="success">有効</Badge>
+                      ) : (
+                        <Badge bg="secondary">無効</Badge>
+                      )}
+                    </td>
+                    <td>{new Date(u.createdAt).toLocaleDateString("ja-JP")}</td>
+                    <td className="text-end">
+                      <Button
+                        size="sm"
+                        variant="outline-primary"
+                        className="me-2"
+                        onClick={() => setEditing(u)}
+                      >
+                        編集
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={u.isActive ? "outline-danger" : "outline-success"}
+                        onClick={() => toggleActive(u)}
+                      >
+                        {u.isActive ? "無効化" : "有効化"}
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Card.Body>
+        </Card>
+      )}
 
       {editing && (
         <UserEditModal

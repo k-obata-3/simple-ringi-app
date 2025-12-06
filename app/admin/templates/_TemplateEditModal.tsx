@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Modal, Button, Form, Table, } from "react-bootstrap";
+import { Modal, Button, Form, Table, Row, Badge, } from "react-bootstrap";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { createTemplateApi, updateTemplateApi } from "./apiClient";
+import { useMediaQuery } from "@/components/ui/useMediaQuery";
+import CommonCard from "@/components/ui/CommonCard";
 
 export default function TemplateEditModal({
   template,
@@ -15,6 +17,7 @@ export default function TemplateEditModal({
   onSaved: (t: any) => void;
 }) {
   const editing = !!template.id;
+  const isMobile = useMediaQuery();
   const push = useNotificationStore((s) => s.push);
   const initialFields = template?.fields ? JSON.parse(template.fields) : [];
 
@@ -126,53 +129,105 @@ export default function TemplateEditModal({
               <Button size="sm" onClick={() => openFieldModal()}>項目追加</Button>
             </div>
 
-            <Table bordered hover>
-              <thead>
-                <tr className="text-center">
-                  <th>項目キー</th>
-                  <th>項目名</th>
-                  <th>型</th>
-                  <th>必須</th>
-                  <th>初期値</th>
-                  <th style={{ width: 140 }}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {fields.map((f: any, idx: number) => (
-                  <tr key={idx} className="text-center">
-                    <td className="text-start">{f.key}</td>
-                    <td className="text-start">{f.label}</td>
-                    <td>{f.inputType}</td>
-                    <td>{f.required ? "✓" : ""}</td>
-                    <td>{f.value}</td>
-                    <td>
-                      <Button
-                        size="sm"
-                        variant="outline-secondary"
-                        onClick={() => openFieldModal(idx)}
-                      >
-                        編集
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        className="ms-2"
-                        onClick={() => deleteField(idx)}
-                      >
-                        削除
-                      </Button>
-                    </td>
+            {isMobile && (
+              <>
+                {fields.map((f: any, idx: number) => {
+                  const body = () => {
+                    return (
+                      <Row>
+                        <div className="d-flex justify-content-between">
+                          <span>{f.inputType}</span>
+                          {f.required ? (
+                            <Badge bg="success">必須</Badge>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </Row>
+                    )
+                  }
+                  const footer = () => {
+                    return (
+                      <div className="d-flex">
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          className="d-grid w-100 me-2"
+                          onClick={() => openFieldModal(idx)}
+                        >
+                          編集
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          className="d-grid w-100 ms-2"
+                          onClick={() => deleteField(idx)}
+                        >
+                          削除
+                        </Button>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div key={idx}>
+                      <CommonCard title={f.label} children={body()} footer={footer()}></CommonCard>
+                    </div>
+                  )
+                })}
+              </>
+            )}
+
+            {!isMobile && (
+              <Table bordered hover>
+                <thead>
+                  <tr className="text-center">
+                    <th>項目キー</th>
+                    <th>項目名</th>
+                    <th>型</th>
+                    <th>必須</th>
+                    <th>初期値</th>
+                    <th style={{ width: 140 }}></th>
                   </tr>
-                ))}
-                {fields.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="text-center text-muted">
-                      項目がありません
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+                </thead>
+                <tbody>
+                  {fields.map((f: any, idx: number) => (
+                    <tr key={idx} className="text-center">
+                      <td className="text-start">{f.key}</td>
+                      <td className="text-start">{f.label}</td>
+                      <td>{f.inputType}</td>
+                      <td>{f.required ? "✓" : ""}</td>
+                      <td>{f.value}</td>
+                      <td>
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          className="me-2"
+                          onClick={() => openFieldModal(idx)}
+                        >
+                          編集
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          className="ms-2"
+                          onClick={() => deleteField(idx)}
+                        >
+                          削除
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                  {fields.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="text-center text-muted">
+                        項目がありません
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            )}
 
             {editing && (
               <Form.Check
