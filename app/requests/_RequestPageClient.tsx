@@ -59,6 +59,7 @@ export default function RequestPageClient({ currentUser, templates, request, app
   }
 
   useEffect(() => {
+    wizard.reset();
     if (request) {
       wizard.setFromExisting({
         requestId: request.id,
@@ -68,8 +69,6 @@ export default function RequestPageClient({ currentUser, templates, request, app
         jsonData: request.jsonData ? JSON.parse(request.jsonData) : {},
         approverIds: request.approvals.map((a: any) => a.approverId),
       });
-    } else {
-      wizard.reset();
     }
   }, [request]);
 
